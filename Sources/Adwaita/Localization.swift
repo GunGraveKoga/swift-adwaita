@@ -57,7 +57,7 @@ public func localizedWithContext(_ context: String, _ msgid: String) -> String {
 public func nlocalized(_ msgid: String, _ msgidPlural: String, count: UInt) -> String {
     msgid.withCString { msgidC in
         msgidPlural.withCString { pluralC in
-            guard let result = g_dngettext(_textDomain, msgidC, pluralC, count) else { return msgid }
+            guard let result = g_dngettext(_textDomain, msgidC, pluralC, gulong(count)) else { return msgid }
             // gettext returns msgid (count==1, no translation) or msgidPlural
             // (count!=1, no translation) by pointer identity — those C-strings
             // belong to the withCString scope, so we have to materialise our
@@ -88,7 +88,7 @@ public func nlocalizedWithContext(
     let combinedPlural = "\(context)\u{04}\(msgidPlural)"
     return combinedSingular.withCString { singularC in
         combinedPlural.withCString { pluralC in
-            guard let result = g_dngettext(_textDomain, singularC, pluralC, count) else {
+            guard let result = g_dngettext(_textDomain, singularC, pluralC, gulong(count)) else {
                 return count == 1 ? msgid : msgidPlural
             }
             // No translation: gettext hands back one of the pointers we passed
@@ -510,17 +510,31 @@ enum LocalizationState {
 }
 
 private func setEnvironmentVariable(_ name: String, _ value: String) {
+    #if os(Windows)
+    name.withCString(encodedAs: UTF16.self) { nameC in
+        value.withCString(encodedAs: UTF16.self) { valueC in
+            _ = SetEnvironmentVariableW(nameC, valueC)
+        }
+    }
+    #else
     name.withCString { nameC in
         value.withCString { valueC in
             _ = setenv(nameC, valueC, 1)
         }
     }
+    #endif
 }
 
 private func unsetEnvironmentVariable(_ name: String) {
+    #if os(Windows)
+    name.withCString(encodedAs: UTF16.self) { nameC in
+        _ = SetEnvironmentVariableW(nameC, nil)
+    }
+    #else
     name.withCString { nameC in
         _ = unsetenv(nameC)
     }
+    #endif
 }
 
 // MARK: - What the session asked for

@@ -66,7 +66,13 @@ public final class TextTag: GObjectRef {
 
     /// The font style (e.g. PANGO_STYLE_ITALIC).
     public var style: PangoStyle {
-        get { PangoStyle(rawValue: UInt32(g_object_get_int(pointer, "style"))) }
+        get { 
+            #if os(Windows)
+            PangoStyle(rawValue: g_object_get_int(pointer, "style"))
+            #else
+            PangoStyle(rawValue: UInt32(g_object_get_int(pointer, "style")))
+            #endif
+        }
         set { g_object_set_int(pointer, "style", Int32(newValue.rawValue)) }
     }
 
@@ -78,7 +84,13 @@ public final class TextTag: GObjectRef {
 
     /// The underline style.
     public var underline: PangoUnderline {
-        get { PangoUnderline(rawValue: UInt32(g_object_get_int(pointer, "underline"))) }
+        get { 
+            #if os(Windows)
+            PangoUnderline(rawValue: g_object_get_int(pointer, "underline"))
+            #else
+            PangoUnderline(rawValue: UInt32(g_object_get_int(pointer, "underline")))
+            #endif
+        }
         set { g_object_set_int(pointer, "underline", Int32(newValue.rawValue)) }
     }
 

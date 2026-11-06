@@ -590,9 +590,16 @@ public extension AdwTabViewShortcuts {
 /// Controls behavior when programmatically scrolling list widgets
 /// (`ListView`, `GridView`, `ColumnView`).
 public struct ListScrollFlags: OptionSet, Sendable {
-    public let rawValue: UInt32
 
-    public init(rawValue: UInt32) {
+    #if os(Windows)
+    public typealias RawValue = Int32
+    #else
+    public typealias RawValue = UInt32
+    #endif
+    
+    public let rawValue: RawValue
+
+    public init(rawValue: RawValue) {
         self.rawValue = rawValue
     }
 

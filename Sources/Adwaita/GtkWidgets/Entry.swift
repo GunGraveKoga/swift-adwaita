@@ -188,7 +188,11 @@ public final class Entry: Widget {
     @discardableResult
     public func onIconPress(_ handler: @escaping @MainActor (GtkEntryIconPosition) -> Void) -> SignalConnection {
         SignalHelper.connectInt(self, signal: .iconPress) { pos in
+            #if os(Windows)
+            handler(GtkEntryIconPosition(pos))
+            #else
             handler(GtkEntryIconPosition(UInt32(pos)))
+            #endif
         }
     }
 

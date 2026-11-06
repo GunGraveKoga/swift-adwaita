@@ -668,29 +668,53 @@ static inline int cadw_has_adw_1_7(void) {
 //  • Binaries compiled on newer systems won't crash on older systems
 //    (dlsym returns NULL, Swift checks prevent calling)
 // --------------------------------------------------------------------------
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#include <psapi.h>
 
+static inline void *dlsym_default(const char *restrict name)
+{
+    HANDLE hProcess = GetCurrentProcess();
+    HMODULE hMods[1024];
+    DWORD cbNeeded;
+
+    if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded)) {
+        int count = cbNeeded / sizeof(HMODULE);
+        for (int i = 0; i < count; i++) {
+            void* proc = (void*)GetProcAddress(hMods[i], name);
+            if (proc != NULL) {
+                return proc;
+            }
+        }
+    } 
+    
+    return NULL;
+}
+#else
 #include <dlfcn.h>
+#define dlsym_default(name) dlsym(RTLD_DEFAULT, (name))
+#endif
 
 // --- Layout (libadwaita 1.6+) ---
 
 static inline GtkWidget *cadw_layout_new(GtkWidget *content) {
     typedef GtkWidget* (*Fn)(GtkWidget*);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_layout_new");
+    Fn fn = (Fn)dlsym_default("adw_layout_new");
     return fn ? fn(content) : NULL;
 }
 static inline GtkWidget *cadw_layout_get_content(gpointer self) {
     typedef GtkWidget* (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_layout_get_content");
+    Fn fn = (Fn)dlsym_default("adw_layout_get_content");
     return fn ? fn(self) : NULL;
 }
 static inline const char *cadw_layout_get_name(gpointer self) {
     typedef const char* (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_layout_get_name");
+    Fn fn = (Fn)dlsym_default("adw_layout_get_name");
     return fn ? fn(self) : NULL;
 }
 static inline void cadw_layout_set_name(gpointer self, const char *name) {
     typedef void (*Fn)(gpointer, const char*);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_layout_set_name");
+    Fn fn = (Fn)dlsym_default("adw_layout_set_name");
     if (fn) fn(self, name);
 }
 
@@ -698,12 +722,12 @@ static inline void cadw_layout_set_name(gpointer self, const char *name) {
 
 static inline GtkWidget *cadw_layout_slot_new(const char *id) {
     typedef GtkWidget* (*Fn)(const char*);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_layout_slot_new");
+    Fn fn = (Fn)dlsym_default("adw_layout_slot_new");
     return fn ? fn(id) : NULL;
 }
 static inline const char *cadw_layout_slot_get_slot_id(gpointer self) {
     typedef const char* (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_layout_slot_get_slot_id");
+    Fn fn = (Fn)dlsym_default("adw_layout_slot_get_slot_id");
     return fn ? fn(self) : NULL;
 }
 
@@ -711,52 +735,52 @@ static inline const char *cadw_layout_slot_get_slot_id(gpointer self) {
 
 static inline GtkWidget *cadw_multi_layout_view_new(void) {
     typedef GtkWidget* (*Fn)(void);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_new");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_new");
     return fn ? fn() : NULL;
 }
 static inline gpointer cadw_multi_layout_view_get_layout(gpointer self) {
     typedef gpointer (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_get_layout");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_get_layout");
     return fn ? fn(self) : NULL;
 }
 static inline void cadw_multi_layout_view_set_layout(gpointer self, gpointer layout) {
     typedef void (*Fn)(gpointer, gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_set_layout");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_set_layout");
     if (fn) fn(self, layout);
 }
 static inline const char *cadw_multi_layout_view_get_layout_name(gpointer self) {
     typedef const char* (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_get_layout_name");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_get_layout_name");
     return fn ? fn(self) : NULL;
 }
 static inline void cadw_multi_layout_view_set_layout_name(gpointer self, const char *name) {
     typedef void (*Fn)(gpointer, const char*);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_set_layout_name");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_set_layout_name");
     if (fn) fn(self, name);
 }
 static inline void cadw_multi_layout_view_add_layout(gpointer self, gpointer layout) {
     typedef void (*Fn)(gpointer, gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_add_layout");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_add_layout");
     if (fn) fn(self, layout);
 }
 static inline gpointer cadw_multi_layout_view_get_child(gpointer self, const char *id) {
     typedef gpointer (*Fn)(gpointer, const char*);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_get_child");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_get_child");
     return fn ? fn(self, id) : NULL;
 }
 static inline gpointer cadw_multi_layout_view_get_layout_by_name(gpointer self, const char *name) {
     typedef gpointer (*Fn)(gpointer, const char*);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_get_layout_by_name");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_get_layout_by_name");
     return fn ? fn(self, name) : NULL;
 }
 static inline void cadw_multi_layout_view_remove_layout(gpointer self, gpointer layout) {
     typedef void (*Fn)(gpointer, gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_remove_layout");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_remove_layout");
     if (fn) fn(self, layout);
 }
 static inline void cadw_multi_layout_view_set_child(gpointer self, const char *id, GtkWidget *child) {
     typedef void (*Fn)(gpointer, const char*, GtkWidget*);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_multi_layout_view_set_child");
+    Fn fn = (Fn)dlsym_default("adw_multi_layout_view_set_child");
     if (fn) fn(self, id, child);
 }
 
@@ -764,12 +788,12 @@ static inline void cadw_multi_layout_view_set_child(gpointer self, const char *i
 
 static inline GtkStringFilterMatchMode cadw_combo_row_get_search_match_mode(gpointer self) {
     typedef GtkStringFilterMatchMode (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_combo_row_get_search_match_mode");
+    Fn fn = (Fn)dlsym_default("adw_combo_row_get_search_match_mode");
     return fn ? fn(self) : (GtkStringFilterMatchMode)0;
 }
 static inline void cadw_combo_row_set_search_match_mode(gpointer self, GtkStringFilterMatchMode mode) {
     typedef void (*Fn)(gpointer, GtkStringFilterMatchMode);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_combo_row_set_search_match_mode");
+    Fn fn = (Fn)dlsym_default("adw_combo_row_set_search_match_mode");
     if (fn) fn(self, mode);
 }
 
@@ -777,12 +801,12 @@ static inline void cadw_combo_row_set_search_match_mode(gpointer self, GtkString
 
 static inline int cadw_entry_row_get_max_length(gpointer self) {
     typedef int (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_entry_row_get_max_length");
+    Fn fn = (Fn)dlsym_default("adw_entry_row_get_max_length");
     return fn ? fn(self) : 0;
 }
 static inline void cadw_entry_row_set_max_length(gpointer self, int length) {
     typedef void (*Fn)(gpointer, int);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_entry_row_set_max_length");
+    Fn fn = (Fn)dlsym_default("adw_entry_row_set_max_length");
     if (fn) fn(self, length);
 }
 
@@ -790,12 +814,12 @@ static inline void cadw_entry_row_set_max_length(gpointer self, int length) {
 
 static inline GtkPackType cadw_navigation_split_view_get_sidebar_position(gpointer self) {
     typedef GtkPackType (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_navigation_split_view_get_sidebar_position");
+    Fn fn = (Fn)dlsym_default("adw_navigation_split_view_get_sidebar_position");
     return fn ? fn(self) : (GtkPackType)0;
 }
 static inline void cadw_navigation_split_view_set_sidebar_position(gpointer self, GtkPackType position) {
     typedef void (*Fn)(gpointer, GtkPackType);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_navigation_split_view_set_sidebar_position");
+    Fn fn = (Fn)dlsym_default("adw_navigation_split_view_set_sidebar_position");
     if (fn) fn(self, position);
 }
 
@@ -805,47 +829,47 @@ static inline void cadw_navigation_split_view_set_sidebar_position(gpointer self
 
 static inline GtkWidget *cadw_inline_view_switcher_new(void) {
     typedef GtkWidget* (*Fn)(void);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_new");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_new");
     return fn ? fn() : NULL;
 }
 static inline int cadw_inline_view_switcher_get_can_shrink(gpointer self) {
     typedef int (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_get_can_shrink");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_get_can_shrink");
     return fn ? fn(self) : 0;
 }
 static inline void cadw_inline_view_switcher_set_can_shrink(gpointer self, int val) {
     typedef void (*Fn)(gpointer, int);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_set_can_shrink");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_set_can_shrink");
     if (fn) fn(self, val);
 }
 static inline int cadw_inline_view_switcher_get_display_mode(gpointer self) {
     typedef int (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_get_display_mode");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_get_display_mode");
     return fn ? fn(self) : 0;
 }
 static inline void cadw_inline_view_switcher_set_display_mode(gpointer self, int mode) {
     typedef void (*Fn)(gpointer, int);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_set_display_mode");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_set_display_mode");
     if (fn) fn(self, mode);
 }
 static inline int cadw_inline_view_switcher_get_homogeneous(gpointer self) {
     typedef int (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_get_homogeneous");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_get_homogeneous");
     return fn ? fn(self) : 0;
 }
 static inline void cadw_inline_view_switcher_set_homogeneous(gpointer self, int val) {
     typedef void (*Fn)(gpointer, int);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_set_homogeneous");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_set_homogeneous");
     if (fn) fn(self, val);
 }
 static inline gpointer cadw_inline_view_switcher_get_stack(gpointer self) {
     typedef gpointer (*Fn)(gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_get_stack");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_get_stack");
     return fn ? fn(self) : NULL;
 }
 static inline void cadw_inline_view_switcher_set_stack(gpointer self, gpointer stack) {
     typedef void (*Fn)(gpointer, gpointer);
-    Fn fn = (Fn)dlsym(RTLD_DEFAULT, "adw_inline_view_switcher_set_stack");
+    Fn fn = (Fn)dlsym_default("adw_inline_view_switcher_set_stack");
     if (fn) fn(self, stack);
 }
 
@@ -873,9 +897,21 @@ static inline const char *cadw_get_object_string(gpointer object, const char *ke
 // `localized(_:)` needs them — the domain has to be bound to a directory
 // before a lookup can find anything — so they belong here rather than in each
 // app's own C shim.
-
+#if defined(_WIN32) || defined(_WIN64)
+#define gettext(String) (String)
+#define dgettext(Domain, String) (String)
+#define ngettext(Msgid1, Msgid2, N) ((N) == 1 ? (Msgid1) : (Msgid2))
+#define textdomain(Domain) ((const char *)(Domain))
+#define bindtextdomain(Domain, Dir) ((const char *)(Dir))
+#define bind_textdomain_codeset(Domain, Codeset) ((const char *)(Codeset))
+#else
 #include <libintl.h>
+#endif
 #include <locale.h>
+
+#ifndef LC_MESSAGES
+#define LC_MESSAGES 1729
+#endif
 
 // glibc and GNU libintl resolve a domain's catalogue once and cache it, so
 // assigning LANGUAGE mid-process changes nothing until this counter moves.
