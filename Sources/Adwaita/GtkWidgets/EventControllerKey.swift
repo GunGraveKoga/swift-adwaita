@@ -46,7 +46,11 @@ public final class EventControllerKey: GObjectRef, EventControllerProtocol {
         -> SignalConnection
     {
         SignalHelper.connectUIntUIntUIntReturnBool(self, signal: .keyPressed) { keyval, keycode, state in
-            handler(keyval, keycode, GdkModifierType(rawValue: GdkModifierType.RawValue(bitPattern: state)))
+            #if os(Windows)
+            handler(keyval, keycode, GdkModifierType(rawValue: Int32(bitPattern: state)))
+            #else
+            handler(keyval, keycode, GdkModifierType(rawValue: state))
+            #endif
         }
     }
 

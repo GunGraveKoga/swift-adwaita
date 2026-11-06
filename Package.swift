@@ -15,7 +15,7 @@ var products: [Product] = [
     )
 ]
 
-#if !os(Windows)
+#if !os(Windows) && !os(macOS)
 products.append(
     // Opt-in WebKitGTK integration. Consumers who want the
     // ``WebView`` widget add this product to their target's
@@ -164,7 +164,7 @@ var targets: [Target] = [
     )
 ]
 
-#if !os(Windows)
+#if !os(Windows) && !os(macOS)
 targets.append(contentsOf: [
     .systemLibrary(
         name: "CWebKit",
