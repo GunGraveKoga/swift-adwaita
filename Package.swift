@@ -152,7 +152,10 @@ var targets: [Target] = [
     .executableTarget(
         name: "DemoApp",
         dependencies: ["DemoAppLib"],
-        path: "Sources/DemoApp"
+        path: "Sources/DemoApp",
+        linkerSettings: [
+            .unsafeFlags(["-Xlinker", "/SUBSYSTEM:WINDOWS", "-Xlinker", "/ENTRY:mainCRTStartup"], .when(platforms: [.windows], configuration: .release)),
+        ]
     ),
     .testTarget(
         name: "AdwaitaTests",
